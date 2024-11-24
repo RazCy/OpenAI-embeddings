@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask with JSON Request</title>
+</head>
+<body>
+    <h1>Submit JSON Data</h1>
+    <form id="jsonForm">
+        <label for="key">Key:</label>
+        <input type="text" id="key" name="key" required>
+        <br><br>
+        <label for="value">Value:</label>
+        <input type="text" id="value" name="value" required>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('jsonForm');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+            const key = document.getElementById('key').value;
+            const value = document.getElementById('value').value;
+
+            // Send as JSON to the Flask backend
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'query':value
+                })
+            });
+
+            const result = await response.json();
+            console.log(result);
+            alert(JSON.stringify(result));
+        });
+    </script>
+</body>
+</html>
