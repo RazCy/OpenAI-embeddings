@@ -1,19 +1,48 @@
-import openai
+import requests
+import json
 
-# Step 1: Set up your API key (replace 'your-api-key' with your actual key)
-openai.api_key = '*********************************'
+# Your OpenAI API key
+API_KEY = "your-openai-api-key"
 
-# Step 2: Define the model and the message for GPT
-model = "gpt-4o-mini-2024-07-18"  # The model you want to use (e.g., gpt-4 or gpt-3.5-turbo)
+# OpenAI endpoint for chat completions
+API_URL = "https://api.openai.com/v1/chat/completions"
 
-# Step 3: Send a request to the OpenAI API
-response = openai.ChatCompletion.create(
-    model=model,
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},  # Optional system message
-        {"role": "user", "content": "What is the capital of France?"},   # User's question
-    ]
-)
+def call_openai_api(prompt):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+    }
+    
+    payload = {
+        "model": "gpt-4",  # or "gpt-3.5-turbo"
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt},
+        ]
+    }
+    
+    try:
+        # Make a POST request to the OpenAI API
+        response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
+        
+        # Raise an exception for HTTP errors
+        response.raise_for_status()
+        
+        # Extract and return the assistant's reply
+        reply = response.json()
+        return reply["choices"][0]["message"]["content"]
+    except requests.exceptions.RequestException as e:
+        return f"Error: {e}"
+    except KeyError:
+        return "Error: Unexpected response format."
 
-# Step 4: Print the response from the assistant
-print(response['choices'][0]['message']['content'].strip())
+# Main loop for user interaction
+if __name__ == "__main__":
+    print("Chat with OpenAI! Type 'exit' to quit.")
+    while True:
+        user_input = input("You: ")
+        if user_input.lower() == "exit":
+            print("Goodbye!")
+            break
+        reply = call_openai_api(user_input)
+        print(f"GPT: {reply}")
